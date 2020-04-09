@@ -14,5 +14,7 @@ namespace WeatherServerApi.Models
         }
 
         public DbSet<Measurement> Measurements { get; set; }
+
+        public DbSet<Station> Stations { get; set; }
     }
 }
