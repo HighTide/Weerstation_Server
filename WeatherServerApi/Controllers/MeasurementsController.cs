@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WeatherServerApi.Models;
+using WeatherServerApi.Data;
 
 namespace WeatherServerApi.Controllers
 {
@@ -13,9 +13,9 @@ namespace WeatherServerApi.Controllers
     [ApiController]
     public class MeasurementsController : ControllerBase
     {
-        private readonly DbModel _context;
+        private readonly ApplicationDbContext _context;
 
-        public MeasurementsController(DbModel context)
+        public MeasurementsController(ApplicationDbContext context)
         {
             _context = context;
         }
@@ -73,17 +73,18 @@ namespace WeatherServerApi.Controllers
             return NoContent();
         }
 
-        // POST: api/Measurements
+        // POST: api/Measurements/[api_key]
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPost]
-        public async Task<ActionResult<Measurement>> PostMeasurement(Measurement measurement)
+        [HttpPost("{api}")]
+        public async Task<ActionResult<Measurement>> PostMeasurement(Measurement measurement, Guid api)
         {
+            Station station = await _context.Stations.FirstOrDefaultAsync(x => x.Api == api);
+            measurement.Station = station;
             _context.Measurements.Add(measurement);
             await _context.SaveChangesAsync();
 
-            // return CreatedAtAction("GetMeasurement", new { id = measurement.Id }, measurement);
-            return CreatedAtAction(nameof(GetMeasurement), new { id = measurement.Id }, measurement);
+            return CreatedAtAction("GetMeasurement", new { id = measurement.Id }, measurement);
         }
 
         // DELETE: api/Measurements/5

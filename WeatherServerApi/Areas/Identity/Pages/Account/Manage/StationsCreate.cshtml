@@ -1,0 +1,55 @@
+﻿@page
+@model WeatherServerApi.CreateModel
+
+@{
+    ViewData["Title"] = "Create Station";
+    ViewData["ActivePage"] = ManageNavPages.Station;
+}
+
+<h1>Create</h1>
+
+<h4>Station</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @*<div class="form-group">
+                    <label asp-for="Station.Api" class="control-label"></label>
+                    <input asp-for="Station.Api" class="form-control" />
+                    <span asp-validation-for="Station.Api" class="text-danger"></span>
+                </div>*@
+            <div class="form-group">
+                <label asp-for="Station.Name" class="control-label"></label>
+                <input asp-for="Station.Name" class="form-control" />
+                <span asp-validation-for="Station.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Station.Color" class="control-label"></label>
+                <input asp-for="Station.Color" type="color" class="form-control" />
+                <span asp-validation-for="Station.Color" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Station.Coordinate_X" class="control-label"></label>
+                <input asp-for="Station.Coordinate_X" class="form-control" />
+                <span asp-validation-for="Station.Coordinate_X" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Station.Coordinate_Y" class="control-label"></label>
+                <input asp-for="Station.Coordinate_Y" class="form-control" />
+                <span asp-validation-for="Station.Coordinate_Y" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./StationsIndex">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
