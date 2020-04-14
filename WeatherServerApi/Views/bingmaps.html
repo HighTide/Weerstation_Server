@@ -136,9 +136,9 @@
         }
     }
 
-    function loadMap() {
+    function loadMapScenario() {
         // Get all data about the Home Stations and init map (incl. pushpins)
-        await xmlHttpRequest({
+        xmlHttpRequest({
             url: 'api/stations/',
             onload: initMap
         });
@@ -176,6 +176,6 @@
 </script>
 
 <script type='text/javascript'
-    src='https://www.bing.com/api/maps/mapcontrol?key=Arqsw64sC6P3jNxXk9HJ_IrUhNfI8e1MjgVSC2QuMiqo3nxvmNS-CduSkOUnRmOu&callback=loadMap'
+    src='https://www.bing.com/api/maps/mapcontrol?key=Arqsw64sC6P3jNxXk9HJ_IrUhNfI8e1MjgVSC2QuMiqo3nxvmNS-CduSkOUnRmOu&callback=loadMapScenario'
     async defer>
 </script>
