@@ -1,0 +1,181 @@
+
+<button onclick='loadMapScenario();'>Click meh</button>
+
+<div id='printoutPanel'></div>
+
+<div id='myMap' style='width: 100vw; height: 100vh;'></div>
+<script type='text/javascript'>
+    // Global array of the Pushpins:
+    var pushpins = new Array(),
+        baseUrl = 'https://localhost:5001/',
+        map;
+
+    function isDefined(val){ return typeof val !== undefined; }
+
+    function xmlHttpRequest(opt){
+        var url = baseUrl + opt.url, // Set url to full url including web domain
+            method = isDefined(opt.method) ? opt.method : 'GET', // Set method to default (GET) if it is not given
+            onload = isDefined(opt.onload) ? opt.onload : function(json){ console.log(json); },
+            onfail = isDefined(opt.onfail) ? opt.onfail : function(){ alert('Something went wrong during the XMLHttpRequest!'); },
+            data = isDefined(opt.data) ? opt.data : {},
+            contentType = isDefined(opt.contentType) ? opt.contentType : 'application/json'; 
+
+        // Initiate XMLHttpRequest
+        var xhr = new XMLHttpRequest();
+        // Set method and URL
+        xhr.open(method, url);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                onload(JSON.parse(xhr.responseText));
+            }
+        };
+        xhr.send(JSON.stringify(data));
+    }
+
+    class Pushpin {
+                        
+        constructor(opt){
+            this.id = opt.id;
+            this.location = new Microsoft.Maps.Location(opt.geoX, opt.geoY);
+            this.pin = new Microsoft.Maps.Pushpin(this.location, {
+                title: opt.title,
+                subTitle: opt.subTitle,
+                text: opt.text,
+                color: opt.color
+            });
+            this.color = opt.color;
+
+            //Make this object accessible inside the mouse event function ('this' will refer to another object in that scope)
+            var pushpin = this;
+
+            //Add the pushpin to the map
+            opt.map.entities.push(this.pin);
+
+            //Add mouse events to the pushpin.
+            Microsoft.Maps.Events.addHandler(this.pin, 'click', function () {
+                //Open new page
+                var url = 'https://localhost:5001/api/measurements/' + pushpin.id;
+                window.open(url, '_blank');
+            });
+            //Return the pushpin object
+            return this;
+        }
+    }
+
+    function initMap(json){
+        // Initiate map and set it to global 'map'
+        map = new Microsoft.Maps.Map(document.getElementById('myMap'), {});
+
+        // Predefine totals of the geo-coordinates
+        var totalX = 0, totalY = 0; 
+
+        // Read Json and create pushpins
+        for(var i = 0; i < json.length; i++){
+            var object = json[i],
+                pushpin = new Pushpin({
+                    id: object.id,
+                    geoX: object.coordinate_x, geoY: object.coordinate_y,
+                    title: object.name + '\'s Home Station',
+                    subTitle: '',
+                    text: object.name[0],
+                    color: object.color,
+                    map: map
+                });
+            
+            // Add pushpin to array of pushpins
+            pushpins[object.id] = pushpin;
+
+            // Increment totals of geo-coordinates
+            totalX+= object.coordinate_x;
+            totalY+= object.coordinate_y;
+        }
+
+        // Divide total of geo-coordinates by amount of pushpins to get the average geo-location
+        var averageX = totalX / json.length,
+            averageY = totalY / json.length;
+        
+        // Set center of map:
+        map.setView({
+            center: new Microsoft.Maps.Location(averageX, averageY),
+            zoom: 15
+        });
+
+        // Update values of measurements every 60 seconds
+        setInterval(xmlHttpRequest({
+            url: 'api/measurements',
+            onload: updateMeasurements
+        }), 60 * 1000 ); // 60 seconds
+    }
+
+    function updateMeasurements(json){
+        for(var i = 0; i < json.length; i++){
+            var object = json[i],
+                pushpin = pushpins[object.station.id],
+                subTitle = ''; // Reset subtitle for each pushpin
+            
+            // Do not add data to subtitle if a null-value is given
+            if(typeof object.temperature !== null) subTitle = subTitle+'T: '+object.temperature.toString()+' &#8451;C ';
+            if(typeof object.humidity !== null) subTitle = subTitle+'H: '+object.humidity.toString()+' &#37;';
+            if(typeof object.windSpeed !== null) subTitle = subTitle+'W: '+object.windpeed.toString()+' km/u';
+            if(typeof object.rainspeed !== null) subTitle = subTitle+'R: '+object.rainspeed.toString()+' mm/u';
+
+            // If no values are given, subtitle is still empty
+            if(subTitle === ''){
+                pushpin.pin.setOptions({
+                    subTitle: 'Offline.',
+                    color: 'red'
+                });
+            } else {
+                pushpin.pin.setOptions({
+                    subTitle: subTitle,
+                    color: pushpin.color
+                });
+            }
+            
+        }
+    }
+
+    function loadMap() {
+        // Get all data about the Home Stations and init map (incl. pushpins)
+        await xmlHttpRequest({
+            url: 'api/stations/',
+            onload: initMap
+        });
+    }
+
+    /*
+    function loadMapScenario() {
+        var map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
+            center: new Microsoft.Maps.Location(47.6149, -122.1941)
+        });
+        
+        //Create custom Pushpin
+        var center = map.getCenter(); //Alternative: new Microsoft.Maps.Location(GeoX, GeoY)
+        var pin = new Microsoft.Maps.Pushpin(center, {
+            title: 'Corné\'s Home Station',
+            subTitle: 'T: 21.5, H: 40.3, W: 25.6',
+            text: 'C',
+            color: 'green'
+        });
+
+        //Add the pushpin to the map
+        map.entities.push(pin);
+        
+        //Add mouse events to the pushpin.
+        Microsoft.Maps.Events.addHandler(pin, 'click', function () {
+            if(pin.getSubTitle() !== 'Offline.'){
+                pin.setOptions({subTitle:'Offline.', color:'red'});
+            } else {
+                pin.setOptions({subTitle:'T: 21.5, H: 40.3, W: 25.6', color:'green'});
+            alert('Back online!');
+            }
+        });
+    }
+    */
+</script>
+
+<script type='text/javascript'
+    src='https://www.bing.com/api/maps/mapcontrol?key=Arqsw64sC6P3jNxXk9HJ_IrUhNfI8e1MjgVSC2QuMiqo3nxvmNS-CduSkOUnRmOu&callback=loadMap'
+    async defer>
+</script>
