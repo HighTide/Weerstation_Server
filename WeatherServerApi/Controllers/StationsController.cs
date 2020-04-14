@@ -47,48 +47,48 @@ namespace WeatherServerApi
         // PUT: api/Stations/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPut("{id}")]
-        [Authorize]
-        public async Task<IActionResult> PutStation(long id, Station station)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            var stationDb = await _context.Stations.FindAsync(id);
+        //[HttpPut("{id}")]
+        //[Authorize]
+        //public async Task<IActionResult> PutStation(long id, Station station)
+        //{
+        //    var user = await _userManager.GetUserAsync(User);
+        //    var stationDb = await _context.Stations.FindAsync(id);
 
-            if (user == null)
-            {
-                return BadRequest();
-            }
+        //    if (user == null)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            if (id != station.Id)
-            {
-                return BadRequest();
-            }
+        //    if (id != station.Id)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            if (stationDb.Owner.Id != user.Id || user.Id != "0" )
-            {
-                return BadRequest();
-            }
+        //    if (stationDb.Owner.Id != user.Id || user.Id != "0" )
+        //    {
+        //        return BadRequest();
+        //    }
 
-            _context.Entry(station).State = EntityState.Modified;
+        //    _context.Entry(station).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!StationExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!StationExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         // No use for post
         //// POST: api/Stations
@@ -106,28 +106,28 @@ namespace WeatherServerApi
         //}
 
         // DELETE: api/Stations/5
-        [HttpDelete("{id}")]
-        [Authorize]
-        public async Task<ActionResult<Station>> DeleteStation(long id)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            var station = await _context.Stations.FindAsync(id);
+        //[HttpDelete("{id}")]
+        //[Authorize]
+        //public async Task<ActionResult<Station>> DeleteStation(long id)
+        //{
+        //    var user = await _userManager.GetUserAsync(User);
+        //    var station = await _context.Stations.FindAsync(id);
 
-            if (station == null)
-            {
-                return NotFound();
-            }
+        //    if (station == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            if (station.Owner.Id != user.Id || user.Id != "0")
-            {
-                return BadRequest();
-            }
+        //    if (station.Owner.Id != user.Id || user.Id != "0")
+        //    {
+        //        return BadRequest();
+        //    }
 
-            _context.Stations.Remove(station);
-            await _context.SaveChangesAsync();
+        //    _context.Stations.Remove(station);
+        //    await _context.SaveChangesAsync();
 
-            return station;
-        }
+        //    return station;
+        //}
 
         private bool StationExists(long id)
         {

@@ -27,6 +27,37 @@ namespace WeatherServerApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Heroku provides PostgreSQL connection URL via env variable
+            var connUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+            var connStr = "";
+
+            if (connUrl == null)
+            {
+                services.AddDbContext<ApplicationDbContext>(opt => opt.UseInMemoryDatabase("DbModel"));
+            } else { 
+                //We're running in "Production" use Postgress Server
+                // Parse connection URL to connection string for Npgsql
+                connUrl = connUrl.Replace("postgres://", string.Empty);
+
+                var pgUserPass = connUrl.Split("@")[0];
+                var pgHostPortDb = connUrl.Split("@")[1];
+                var pgHostPort = pgHostPortDb.Split("/")[0];
+
+                var pgDb = pgHostPortDb.Split("/")[1];
+                var pgUser = pgUserPass.Split(":")[0];
+                var pgPass = pgUserPass.Split(":")[1];
+                var pgHost = pgHostPort.Split(":")[0];
+                var pgPort = pgHostPort.Split(":")[1];
+
+                connStr = $"Server={pgHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb};";
+                //SSL is FORCED
+                connStr = connStr + "sslmode=Require; TrustServerCertificate=True;";
+
+                services.AddDbContext<ApplicationDbContext>(opt => opt.UseNpgsql(connStr));
+            }
+
+
+
             //services.AddDbContext<ApplicationDbContext>(opt => opt.UseInMemoryDatabase("DbModel"));
             services.AddDbContext<ApplicationDbContext>(opt => opt.UseInMemoryDatabase("DbModel"));
             
