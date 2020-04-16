@@ -4,5 +4,157 @@
     ViewData["Title"] = "Map";
 }
 
-<h1>Map</h1>
+
+<button onclick='loadMapScenario();'>Click meh</button>
+
+<div id='printoutPanel'></div>
+
+<div id='myMap' style='width: 100vw; height: 100vh;'></div>
+<script type='text/javascript'>
+    /* Global array of the Pushpins: */
+    var pushpins = new Array(),
+        baseUrl = 'https://localhost:5001/',
+        map;
+
+    function isDefined(val){ return typeof val !== undefined; }
+
+    function xmlHttpRequest(opt){
+        var url = baseUrl + opt.url, /* Set url to full url including web domain */
+            method = isDefined(opt.method) ? opt.method : 'GET', /* Set method to default (GET) if it is not given */
+            onload = isDefined(opt.onload) ? opt.onload : function(json){ console.log(json); },
+            onfail = isDefined(opt.onfail) ? opt.onfail : function(){ alert('Something went wrong during the XMLHttpRequest!'); },
+            data = isDefined(opt.data) ? opt.data : {},
+            contentType = isDefined(opt.contentType) ? opt.contentType : 'application/json'; 
+
+        /* Initiate XMLHttpRequest */
+        var xhr = new XMLHttpRequest();
+        /* Set method and URL */
+        xhr.open(method, url);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                onload(JSON.parse(xhr.responseText));
+            }
+        };
+        xhr.send(JSON.stringify(data));
+        /* opt.onload(JSON.parse('[{"id": 1, "name": "Corné", "color": "#6922BB", "coordinate_x": 51.9291187, "coordinate_y": 4.5973773 }]')); */
+    }
+
+    class Pushpin {
+                        
+        constructor(opt){
+            this.id = opt.id;
+            this.location = new Microsoft.Maps.Location(opt.geoX, opt.geoY);
+            this.pin = new Microsoft.Maps.Pushpin(this.location, {
+                title: opt.title,
+                subTitle: opt.subTitle,
+                text: opt.text,
+                color: opt.color
+            });
+            this.color = opt.color;
+
+            /*Make this object accessible inside the mouse event function ('this' will refer to another object in that scope) */
+            var pushpin = this;
+
+            /*Add the pushpin to the map */
+            opt.map.entities.push(this.pin);
+
+            /*Add mouse events to the pushpin. */
+            Microsoft.Maps.Events.addHandler(this.pin, 'click', function () {
+                /*Open new page */
+                var url = baseUrl + 'api/measurements/' + pushpin.id;
+                window.open(url, '_blank');
+            });
+            /*Return the pushpin object */
+            return this;
+        }
+    }
+
+    function initMap(json){
+        /* Initiate map and set it to global 'map' */
+        map = new Microsoft.Maps.Map(document.getElementById('myMap'), {});
+
+        /* Predefine totals of the geo-coordinates */
+        var totalX = 0, totalY = 0; 
+
+        /* Read Json and create pushpins */
+        for(var index in json){
+            var object = json[index],
+				pushpin = new Pushpin({
+                    id: object.id,
+                    geoX: object.coordinate_x, geoY: object.coordinate_y,
+					/* geoX: 51.9291187, geoY: 4.5973773, */
+                    title: object.name,
+                    subTitle: '',
+                    text: object.name[0],
+                    color: object.color,
+                    map: map
+                });
+            
+            /* Add pushpin to array of pushpins */
+            pushpins[object.id] = pushpin;
+
+            /* Increment totals of geo-coordinates */
+            totalX+= object.coordinate_x;
+            totalY+= object.coordinate_y;
+			console.log('Im where I want to be!');
+        }
+	
+        /* Divide total of geo-coordinates by amount of pushpins to get the average geo-location */
+        var averageX = totalX / json.length,
+            averageY = totalY / json.length;
+        
+        /* Set center of map: */
+        map.setView({
+            center: new Microsoft.Maps.Location(/* 51.9291187, 4.5973773 */ averageX, averageY),
+            zoom: 15
+        });
+
+        /* Update values of measurements every 60 seconds */
+        setInterval(xmlHttpRequest({
+            url: 'api/measurements',
+            onload: updateMeasurements
+        }), 60 * 1000 ); /* 60 seconds */
+    }
+
+    function updateMeasurements(json){
+        for(var index in json){
+            var object = json[index],
+                // pushpin = pushpins[object.station.id],
+                pushpin = pushpins[object.id],
+                subTitle = ''; /* Reset subtitle for each pushpin */
+            
+            /* Do not add data to subtitle if a null-value is given */
+            if(typeof object.temperature !== undefined && typeof object.temperature !== null) subTitle = subTitle+'T: '+object.temperature.toString()+' °C ';
+            if(typeof object.humidity !== null && typeof object.humidity !== undefined) subTitle = subTitle+'H: '+object.humidity.toString()+' %';
+            if(typeof object.windSpeed !== null && typeof object.windSpeed !== undefined) subTitle = subTitle+'W: '+object.windpeed.toString()+' km/u';
+            /* if(typeof object.rainspeed !== null && typeof object.rainspeed !== undefined) subTitle = subTitle+'R: '+object.rainspeed.toString()+' mm/u'; */
+
+            /* If no values are given, subtitle is still empty */
+            if(subTitle === ''){
+                pushpin.pin.setOptions({
+                    subTitle: 'Offline.',
+                    color: 'red'
+                });
+            } else {
+                pushpin.pin.setOptions({
+                    subTitle: subTitle,
+                    color: pushpin.color
+                });
+            }
+            
+        }
+    }
+
+    function loadMapScenario() {
+        /* Get all data about the Home Stations and init map (incl. pushpins) */
+        xmlHttpRequest({
+            url: 'api/stations/',
+            onload: initMap
+        });
+    }
+
+</script>
+
+<script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?key=YourBingMapsKey&callback=loadMapScenario' async defer></script>
 
