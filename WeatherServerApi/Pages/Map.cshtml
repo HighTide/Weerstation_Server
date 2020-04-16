@@ -9,37 +9,59 @@
 
 <div id='printoutPanel'></div>
 
-<div id='myMap' style='width: 100vw; height: 100vh;'></div>
+<div id='myMap' style='width: 500px; height: 500px; margin:0; padding:0;'></div>
 <script type='text/javascript'>
     /* Global array of the Pushpins: */
     var pushpins = new Array(),
-        baseUrl = 'https://localhost:5001/',
+        measurements = new Array(),
+        baseUrl = 'https://weerstation-server.herokuapp.com/',
+        // baseUrl = '',
         map;
 
     function isDefined(val){ return typeof val !== undefined; }
+    function isNull(val){ return typeof val === null; }
+
+    function getHomeStations(){
+        /* xmlHttpRequest({
+            url: 'api/stations/',
+            onload: initMap
+        }); */
+        initMap(JSON.parse('[{"id": 3,"api": "44da835e-da80-4496-a759-b86f03e25d8f","name": "Jarek","owner": null,"color": "#0000ff","coordinate_X": 51.510743,"coordinate_Y": 4.284851},{"id": 4,"api": "c3562793-9b54-4564-8463-4d920301a295","name": "Frédérique","owner": null,"color": "#00ffff","coordinate_X": 51.828796,"coordinate_Y": 4.368672},{"id": 7,"api": "f67daefa-0924-47b6-9702-8fbbc125e007","name": "Timstation","owner": null,"color": "#ff0000","coordinate_X": 51.896095,"coordinate_Y": 4.628533},{"id": 8,"api": "bc0933f6-8983-4709-bfc0-b6a5ffbbe292","name": "Corné","owner": null,"color": "#0a1beb","coordinate_X": 51.9291187,"coordinate_Y": 4.5973773},{"id": 10,"api": "cdfdc310-3ae0-4c44-bd9e-058bcfc66901","name": "Tahsin","owner": null,"color": "#000000","coordinate_X": 52.0705,"coordinate_Y": 4.3007},{"id": 2,"api": "7edf5d65-c076-42d8-acbd-d0924de8c185","name": "Jurre","owner": null,"color": "#0000ff","coordinate_X": 51.851987,"coordinate_Y": 4.248637}]'))
+    }
+
+    function getMeasurements(){
+        /* xmlHttpRequest({
+            url: 'api/measurements/',
+            onload: updateMeasurements
+        }); */
+        updateMeasurements(JSON.parse('[{"id":2,"temperature":22.5,"humidity":50,"windSpeed":0,"station":3},{"id":3,"temperature":24.30,"humidity":41.00,"windSpeed":10,"station":3},{"id":4,"temperature":25.00,"humidity":39.00,"windSpeed":10,"station":3},{"id":5,"temperature":25.10,"humidity":38.00,"windSpeed":10,"station":3},{"id":6,"temperature":25.30,"humidity":37.00,"windSpeed":10,"station":3},{"id":7,"temperature":25.40,"humidity":37.00,"windSpeed":10,"station":3},{"id":8,"temperature":25.60,"humidity":36.00,"windSpeed":10,"station":3},{"id":9,"temperature":25.50,"humidity":36.00,"windSpeed":10,"station":3},{"id":10,"temperature":25.50,"humidity":36.00,"windSpeed":10,"station":3},{"id":11,"temperature":25.70,"humidity":37.00,"windSpeed":0,"station":3},{"id":12,"temperature":25.70,"humidity":36.00,"windSpeed":30,"station":3},{"id":13,"temperature":25.70,"humidity":36.00,"windSpeed":30,"station":3},{"id":14,"temperature":25.70,"humidity":36.00,"windSpeed":30,"station":3},{"id":15,"temperature":25.70,"humidity":36.00,"windSpeed":30,"station":3},{"id":16,"temperature":25.70,"humidity":36.00,"windSpeed":30,"station":3}]'));
+    }
 
     function xmlHttpRequest(opt){
-        var url = baseUrl + opt.url, /* Set url to full url including web domain */
-            method = isDefined(opt.method) ? opt.method : 'GET', /* Set method to default (GET) if it is not given */
+        var url = opt.url,
             onload = isDefined(opt.onload) ? opt.onload : function(json){ console.log(json); },
             onfail = isDefined(opt.onfail) ? opt.onfail : function(){ alert('Something went wrong during the XMLHttpRequest!'); },
             data = isDefined(opt.data) ? opt.data : {},
             contentType = isDefined(opt.contentType) ? opt.contentType : 'application/json'; 
 
-        /* Initiate XMLHttpRequest */
+        // Initiate XMLHttpRequest
         var xhr = new XMLHttpRequest();
-        /* Set method and URL */
-        xhr.open(method, url);
+        // Set method and URL
+        xhr.open('GET', url);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
             if (xhr.status === 200) {
                 onload(JSON.parse(xhr.responseText));
+            } else {
+                onfail();
             }
         };
         xhr.send(JSON.stringify(data));
-        /* opt.onload(JSON.parse('[{"id": 1, "name": "Corné", "color": "#6922BB", "coordinate_x": 51.9291187, "coordinate_y": 4.5973773 }]')); */
+        // opt.onload(JSON.parse('[{"id": 3,"api": "44da835e-da80-4496-a759-b86f03e25d8f","name": "Jarek","owner": null,"color": "#ff0000","coordinate_X": 51.510743,"coordinate_Y": 4.284851},{"id": 4,"api": "c3562793-9b54-4564-8463-4d920301a295","name": "Frédérique","owner": null,"color": "#00ffff","coordinate_X": 51.828796,"coordinate_Y": 4.368672},{"id": 7,"api": "f67daefa-0924-47b6-9702-8fbbc125e007","name": "Timstation","owner": null,"color": "#ff0000","coordinate_X": 51.896095,"coordinate_Y": 4.628533},{"id": 8,"api": "bc0933f6-8983-4709-bfc0-b6a5ffbbe292","name": "Corné","owner": null,"color": "#0a1beb","coordinate_X": 51.9291187,"coordinate_Y": 4.5973773},{"id": 10,"api": "cdfdc310-3ae0-4c44-bd9e-058bcfc66901","name": "Tahsin","owner": null,"color": "#000000","coordinate_X": 52.0705,"coordinate_Y": 4.3007},{"id": 2,"api": "7edf5d65-c076-42d8-acbd-d0924de8c185","name": "Jurre","owner": null,"color": "#0000ff","coordinate_X": 51.851987,"coordinate_Y": 4.248637}]'));
+        // opt.onload(JSON.parse('[{"id": 1, "name": "Corné", "color": "#6922BB", "coordinate_X": 51.9291187, "coordinate_Y": 4.5973773, "temperature": 21.5, "humidity": 33.2 }]'));
     }
 
+    
     class Pushpin {
                         
         constructor(opt){
@@ -71,18 +93,18 @@
     }
 
     function initMap(json){
-        /* Initiate map and set it to global 'map' */
+        // Initiate map and set it to global 'map'
         map = new Microsoft.Maps.Map(document.getElementById('myMap'), {});
 
-        /* Predefine totals of the geo-coordinates */
+        // Predefine totals of the geo-coordinates
         var totalX = 0, totalY = 0; 
 
-        /* Read Json and create pushpins */
+        // Read Json and create pushpins
         for(var index in json){
             var object = json[index],
 				pushpin = new Pushpin({
                     id: object.id,
-                    geoX: object.coordinate_x, geoY: object.coordinate_y,
+                    geoX: object.coordinate_X, geoY: object.coordinate_Y,
 					/* geoX: 51.9291187, geoY: 4.5973773, */
                     title: object.name,
                     subTitle: '',
@@ -91,70 +113,87 @@
                     map: map
                 });
             
-            /* Add pushpin to array of pushpins */
+            // Add pushpin to array of pushpins
             pushpins[object.id] = pushpin;
+            measurements[object.id] = '';
 
-            /* Increment totals of geo-coordinates */
-            totalX+= object.coordinate_x;
-            totalY+= object.coordinate_y;
+            // Increment totals of geo-coordinates
+            totalX+= object.coordinate_X;
+            totalY+= object.coordinate_Y;
 			console.log('Im where I want to be!');
         }
 	
-        /* Divide total of geo-coordinates by amount of pushpins to get the average geo-location */
+        // Divide total of geo-coordinates by amount of pushpins to get the average geo-location
         var averageX = totalX / json.length,
             averageY = totalY / json.length;
         
-        /* Set center of map: */
+        // Set center of map:
         map.setView({
-            center: new Microsoft.Maps.Location(/* 51.9291187, 4.5973773 */ averageX, averageY),
-            zoom: 15
+            center: new Microsoft.Maps.Location( averageX, averageY), // 51.9291187, 4.5973773 
+            zoom: 10
         });
 
-        /* Update values of measurements every 60 seconds */
-        setInterval(xmlHttpRequest({
-            url: 'api/measurements',
-            onload: updateMeasurements
-        }), 60 * 1000 ); /* 60 seconds */
+        // Update values of measurements every 60 seconds
+        getMeasurements();
+        setInterval(getMeasurements, 60 * 1000 ); // 60 seconds
     }
 
     function updateMeasurements(json){
+        // Clear measurements
+        for(var index in measurements){ measurements[index] = ''; }
+
+        // Update measurements
         for(var index in json){
             var object = json[index],
-                // pushpin = pushpins[object.station.id],
-                pushpin = pushpins[object.id],
-                subTitle = ''; /* Reset subtitle for each pushpin */
+                // Get basic information
+                id = object.station,
+                temperature = object.temperature,
+                humidity = object.humidity,
+                windSpeed = object.windSpeed,
+                pushpin = pushpins[id],
+                measurement = '';
+                
             
-            /* Do not add data to subtitle if a null-value is given */
-            if(typeof object.temperature !== undefined && typeof object.temperature !== null) subTitle = subTitle+'T: '+object.temperature.toString()+' °C ';
-            if(typeof object.humidity !== null && typeof object.humidity !== undefined) subTitle = subTitle+'H: '+object.humidity.toString()+' %';
-            if(typeof object.windSpeed !== null && typeof object.windSpeed !== undefined) subTitle = subTitle+'W: '+object.windpeed.toString()+' km/u';
-            /* if(typeof object.rainspeed !== null && typeof object.rainspeed !== undefined) subTitle = subTitle+'R: '+object.rainspeed.toString()+' mm/u'; */
+            // Do not add data to subtitle if a null-value is given
+            if(isDefined(temperature) && !isNull(temperature)) measurement = measurement+'T: '+temperature.toString()+' °C ';
+            if(isDefined(humidity) && !isNull(humidity)) measurement = measurement+'H: '+humidity.toString()+' %';
+            if(isDefined(windSpeed) && !isNull(windSpeed)) measurement = measurement+'W: '+windSpeed.toString()+' km/u';
 
-            /* If no values are given, subtitle is still empty */
-            if(subTitle === ''){
+            measurements[id] = measurement;
+            
+        }
+
+        // Process measurements
+        for(var id in pushpins){
+            var pushpin = pushpins[id],
+                measurement = measurements[id];
+
+            // If no values are given, subtitle is still empty
+            if(measurement.length === 0){
                 pushpin.pin.setOptions({
                     subTitle: 'Offline.',
                     color: 'red'
                 });
             } else {
                 pushpin.pin.setOptions({
-                    subTitle: subTitle,
+                    subTitle: measurement,
                     color: pushpin.color
                 });
             }
-            
+
         }
     }
 
     function loadMapScenario() {
-        /* Get all data about the Home Stations and init map (incl. pushpins) */
-        xmlHttpRequest({
+        // Get all data about the Home Stations and init map (incl. pushpins) */
+        getHomeStations();
+        /* xmlHttpRequest({
             url: 'api/stations/',
             onload: initMap
-        });
+        }); */
     }
 
 </script>
 
-<script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?key=YourBingMapsKey&callback=loadMapScenario' async defer></script>
+<script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?key=Arqsw64sC6P3jNxXk9HJ_IrUhNfI8e1MjgVSC2QuMiqo3nxvmNS-CduSkOUnRmOu&callback=loadMapScenario' async defer></script>
 
