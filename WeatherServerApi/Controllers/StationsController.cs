@@ -18,6 +18,16 @@ namespace WeatherServerApi
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ApplicationDbContext _context;
 
+        public class localStationModel {
+            public long Id { get; set; }
+            public String Name { get; set; }
+            public String Owner { get; set; }
+            public String Color { get; set; }
+            public double Coordinate_X { get; set; }
+            public double Coordinate_Y { get; set; }
+        }
+
+
         public StationsController(ApplicationDbContext context)
         {
             _context = context;
@@ -25,9 +35,17 @@ namespace WeatherServerApi
 
         // GET: api/Stations
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Station>>> GetStations()
+        public async Task<ActionResult<IEnumerable<localStationModel>>> GetStations()
         {
-            return await _context.Stations.ToListAsync();
+            return await _context.Stations.Select(x => new localStationModel
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Owner = x.Owner.UserName,
+                Color = x.Color,
+                Coordinate_X = x.Coordinate_X,
+                Coordinate_Y = x.Coordinate_Y
+            }).ToListAsync();
         }
 
         // GET: api/Stations/5

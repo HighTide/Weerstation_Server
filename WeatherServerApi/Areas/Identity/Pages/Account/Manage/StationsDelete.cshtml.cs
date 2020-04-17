@@ -48,6 +48,13 @@ namespace WeatherServerApi
 
             if (Station != null)
             {
+                List<Measurement> mesurements = _context.Measurements.Where(x => x.Station == Station).ToList();
+
+                foreach (Measurement mesurement in mesurements)
+                {
+                    _context.Measurements.Remove(mesurement);
+                }
+
                 _context.Stations.Remove(Station);
                 await _context.SaveChangesAsync();
             }
