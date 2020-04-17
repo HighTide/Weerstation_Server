@@ -41,7 +41,7 @@ namespace WeatherServerApi
             {
                 Id = x.Id,
                 Name = x.Name,
-                Owner = x.Owner.UserName,
+                Owner = x.Owner.Id,
                 Color = x.Color,
                 Coordinate_X = x.Coordinate_X,
                 Coordinate_Y = x.Coordinate_Y

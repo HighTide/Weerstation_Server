@@ -20,11 +20,46 @@ namespace WeatherServerApi.Controllers
             _context = context;
         }
 
+        public class localMeasurmentModel
+        {
+            public long Id { get; set; }
+            public decimal Temperature { get; set; }
+            public decimal Humidity { get; set; }
+            public decimal WindSpeed { get; set; }
+            public long Station { get; set; }
+        }
+
         // GET: api/Measurements
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Measurement>>> GetMeasurements()
+        public async Task<ActionResult<IEnumerable<localMeasurmentModel>>> GetMeasurements()
         {
-            return await _context.Measurements.ToListAsync();
+            //return await _context.Measurements.ToListAsync();
+
+            return await _context.Measurements.Select(x => new localMeasurmentModel
+            {
+                Id = x.Id,
+                Temperature = x.Temperature,
+                Humidity = x.Humidity,
+                WindSpeed = x.WindSpeed,
+                Station = x.Station.Id,
+            }).ToListAsync();
+        }
+
+
+                    // GET: api/Measurements
+        [HttpGet("latest")]
+        public async Task<ActionResult<IEnumerable<localMeasurmentModel>>> GetLatestMeasurements()
+        {
+            //return await _context.Measurements.ToListAsync();
+
+            return await _context.Measurements.Select(x => new localMeasurmentModel
+            {
+                Id = x.Id,
+                Temperature = x.Temperature,
+                Humidity = x.Humidity,
+                WindSpeed = x.WindSpeed,
+                Station = x.Station.Id,
+            }).ToListAsync();
         }
 
         // GET: api/Measurements/5
@@ -81,6 +116,7 @@ namespace WeatherServerApi.Controllers
         {
             Station station = await _context.Stations.FirstOrDefaultAsync(x => x.Api == api);
             measurement.Station = station;
+            measurement.Time = DateTime.Now;
             _context.Measurements.Add(measurement);
             await _context.SaveChangesAsync();
 

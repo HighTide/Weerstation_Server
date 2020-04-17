@@ -8,6 +8,7 @@ namespace WeatherServerApi.Data
     public class Measurement
     {
         public long Id { get; set; }
+        public DateTime Time { get; set; }
         public decimal Temperature { get; set; }
         public decimal Humidity { get; set; }
         public decimal WindSpeed { get; set; }
