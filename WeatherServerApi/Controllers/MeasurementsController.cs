@@ -46,20 +46,36 @@ namespace WeatherServerApi.Controllers
         }
 
 
-                    // GET: api/Measurements
+        // GET: api/Measurements
         [HttpGet("latest")]
         public async Task<ActionResult<IEnumerable<localMeasurmentModel>>> GetLatestMeasurements()
         {
             //return await _context.Measurements.ToListAsync();
+            List<Station> stations = await _context.Stations.ToListAsync();
+            List<localMeasurmentModel> measurment = new List<localMeasurmentModel>();
 
-            return await _context.Measurements.Select(x => new localMeasurmentModel
+            foreach (Station station in stations)
             {
-                Id = x.Id,
-                Temperature = x.Temperature,
-                Humidity = x.Humidity,
-                WindSpeed = x.WindSpeed,
-                Station = x.Station.Id,
-            }).ToListAsync();
+
+                //I Know this is slow and wrong, but if you can get it to work the proper way, power to you! #PowerToYou
+                localMeasurmentModel? m = await _context.Measurements.Where(m => m.Station.Id == station.Id).Where(m => m.Time >= DateTime.Now.AddMinutes(-30)).OrderByDescending(m => m.Id).Select(x => new localMeasurmentModel
+                {
+                    Id = x.Id,
+                    Temperature = x.Temperature,
+                    Humidity = x.Humidity,
+                    WindSpeed = x.WindSpeed,
+                    Station = x.Station.Id,
+                }).FirstOrDefaultAsync();
+
+                if (m != null)
+                {
+                    measurment.Add(m);
+                }
+
+                
+            }
+
+            return measurment;
         }
 
         // GET: api/Measurements/5

@@ -52,7 +52,7 @@ namespace WeatherServerApi
                 connStr = $"Server={pgHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb};";
                 //SSL is FORCED
                 connStr = connStr + "sslmode=Require; TrustServerCertificate=True;";
-
+                
                 services.AddDbContext<ApplicationDbContext>(opt => opt.UseNpgsql(connStr));
             }
 

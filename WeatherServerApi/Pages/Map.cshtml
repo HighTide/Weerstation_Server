@@ -5,11 +5,11 @@
 }
 
 
-<button onclick='loadMapScenario();'>Click meh</button>
+@*<button onclick='loadMapScenario();'>Click meh</button>*@
 
 <div id='printoutPanel'></div>
 
-<div id='myMap' style='width: 500px; height: 500px; margin:0; padding:0;'></div>
+<div id='myMap' style='width: 100%; height: 83vh; margin:0; padding:0;'></div>
 <script type='text/javascript'>
     /* Global array of the Pushpins: */
     var pushpins = new Array(),
@@ -31,7 +31,7 @@
 
     function getMeasurements(){
          xmlHttpRequest({
-            url: 'api/measurements/',
+            url: 'api/measurements/latest',
             onload: updateMeasurements
         }); 
         //updateMeasurements(JSON.parse('[{"id":2,"temperature":22.5,"humidity":50,"windSpeed":0,"station":3},{"id":3,"temperature":24.30,"humidity":41.00,"windSpeed":10,"station":3},{"id":4,"temperature":25.00,"humidity":39.00,"windSpeed":10,"station":3},{"id":5,"temperature":25.10,"humidity":38.00,"windSpeed":10,"station":3},{"id":6,"temperature":25.30,"humidity":37.00,"windSpeed":10,"station":3},{"id":7,"temperature":25.40,"humidity":37.00,"windSpeed":10,"station":3},{"id":8,"temperature":25.60,"humidity":36.00,"windSpeed":10,"station":3},{"id":9,"temperature":25.50,"humidity":36.00,"windSpeed":10,"station":3},{"id":10,"temperature":25.50,"humidity":36.00,"windSpeed":10,"station":3},{"id":11,"temperature":25.70,"humidity":37.00,"windSpeed":0,"station":3},{"id":12,"temperature":25.70,"humidity":36.00,"windSpeed":30,"station":3},{"id":13,"temperature":25.70,"humidity":36.00,"windSpeed":30,"station":3},{"id":14,"temperature":25.70,"humidity":36.00,"windSpeed":30,"station":3},{"id":15,"temperature":25.70,"humidity":36.00,"windSpeed":30,"station":3},{"id":16,"temperature":25.70,"humidity":36.00,"windSpeed":30,"station":3}]'));
@@ -84,7 +84,7 @@
             /*Add mouse events to the pushpin. */
             Microsoft.Maps.Events.addHandler(this.pin, 'click', function () {
                 /*Open new page */
-                var url = baseUrl + 'api/measurements/' + pushpin.id;
+                var url = baseUrl + 'api/stations/' + pushpin.id;
                 window.open(url, '_blank');
             });
             /*Return the pushpin object */

@@ -50,16 +50,18 @@ namespace WeatherServerApi
 
         // GET: api/Stations/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<Station>>> GetStation(string Owner)
+        public async Task<ActionResult<IEnumerable<localStationModel>>> GetStation(long id)
         {
-            var stations = await _context.Stations.Where(station => station.Owner.Id == Owner).ToListAsync();
 
-            if (stations == null)
+            return await _context.Stations.Where(s => s.Id == id).Select(x => new localStationModel
             {
-                return NotFound();
-            }
-
-            return stations;
+                Id = x.Id,
+                Name = x.Name,
+                Owner = x.Owner.Id,
+                Color = x.Color,
+                Coordinate_X = x.Coordinate_X,
+                Coordinate_Y = x.Coordinate_Y
+            }).ToListAsync();
         }
 
         // PUT: api/Stations/5
