@@ -85,7 +85,7 @@
 
     function initMap(json) {
         // Initiate map and set it to global 'map'
-        map = new Microsoft.Maps.Map(document.getElementById('myMap'), {});
+        map = new Microsoft.Maps.Map(document.getElementById('myMap'), {mapTypeId: Microsoft.Maps.MapTypeId.aerial});
 
         // Predefine totals of the geo-coordinates
         var totalX = 0, totalY = 0;
@@ -119,7 +119,8 @@
         // Set center of map:
         map.setView({
             center: new Microsoft.Maps.Location(averageX, averageY),
-            zoom: 10
+            zoom: 10,
+            labelOverlay: Microsoft.Maps.LabelOverlay.hidden
         });
 
         // Update values of measurements every 60 seconds
