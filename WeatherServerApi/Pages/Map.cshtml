@@ -85,7 +85,7 @@
 
     function initMap(json) {
         // Initiate map and set it to global 'map'
-        map = new Microsoft.Maps.Map(document.getElementById('myMap'), {mapTypeId: Microsoft.Maps.MapTypeId.aerial});
+        map = new Microsoft.Maps.Map(document.getElementById('myMap'), { mapTypeId: Microsoft.Maps.MapTypeId.aerial });
 
         // Predefine totals of the geo-coordinates
         var totalX = 0, totalY = 0;
@@ -146,10 +146,10 @@
 
 
             // Do not add data to subtitle if a null-value is given
-            if (isDefined(temperature) && !isNull(temperature)) { measurement = measurement + 'T: ' + temperature.toString() + ' °C ' };
-            if (isDefined(humidity) && !isNull(humidity)) { measurement = measurement + 'H: ' + humidity.toString() + ' %' };
-            if (isDefined(windSpeed) && !isNull(windSpeed)) { measurement = measurement + 'W: ' + windSpeed.toString() + ' km/u' };
-            if (isDefined(pressure) && !isNull(pressure)) { measurement = measurement + 'P: ' + pressure.toString() + ' kPa' };
+            if (isDefined(temperature) && !isNull(temperature) && temperature != 0) { measurement = measurement + 'T: ' + temperature.toString() + ' °C ' };
+            if (isDefined(humidity) && !isNull(humidity) && humidity != 0) { measurement = measurement + 'H: ' + humidity.toString() + ' %' };
+            if (isDefined(windSpeed) && !isNull(windSpeed) && windSpeed != 0) { measurement = measurement + 'W: ' + windSpeed.toString() + ' km/u' };
+            if (isDefined(pressure) && !isNull(pressure) && pressure != 0) { measurement = measurement + 'P: ' + pressure.toString() + ' kPa' };
 
             measurements[id] = measurement;
 
