@@ -34,7 +34,8 @@
         var url = opt.url,
             onload = isDefined(opt.onload) ? opt.onload : function (json) { console.log(json); },
             onfail = isDefined(opt.onfail) ? opt.onfail : function () { alert('Something went wrong during the XMLHttpRequest!'); },
-            data = isDefined(opt.data) ? opt.data : {};
+            data = isDefined(opt.data) ? opt.data : {},
+            contentType = isDefined(opt.contentType) ? opt.contentType : 'application/json';
 
         // Initiate XMLHttpRequest
         var xhr = new XMLHttpRequest();
@@ -92,7 +93,6 @@
         // Read Json and create pushpins
         for (var index in json) {
             var object = json[index];
-            object.coordinate_X = 51.9291187; object.coordinate_Y = 4.5973773;
             var pushpin = new Pushpin({
                     id: object.id,
                     geoX: object.coordinate_X, geoY: object.coordinate_Y,
