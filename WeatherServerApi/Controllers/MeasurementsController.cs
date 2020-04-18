@@ -26,6 +26,7 @@ namespace WeatherServerApi.Controllers
             public decimal Temperature { get; set; }
             public decimal Humidity { get; set; }
             public decimal WindSpeed { get; set; }
+            public decimal RainSpeed { get; set; }
             public decimal Pressure { get; set; }
             public long Station { get; set; }
         }
@@ -42,6 +43,7 @@ namespace WeatherServerApi.Controllers
                 Temperature = x.Temperature,
                 Humidity = x.Humidity,
                 WindSpeed = x.WindSpeed,
+                RainSpeed = x.RainSpeed,
                 Pressure = x.Pressure,
                 Station = x.Station.Id,
             }).ToListAsync();
@@ -66,6 +68,7 @@ namespace WeatherServerApi.Controllers
                     Temperature = x.Temperature,
                     Humidity = x.Humidity,
                     WindSpeed = x.WindSpeed,
+                    RainSpeed = x.RainSpeed,
                     Pressure = x.Pressure,
                     Station = x.Station.Id,
                 }).FirstOrDefaultAsync();
