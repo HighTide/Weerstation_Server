@@ -92,8 +92,8 @@
 
         // Read Json and create pushpins
         for (var index in json) {
-            var object = json[index];
-            var pushpin = new Pushpin({
+            var object = json[index],
+                pushpin = new Pushpin({
                     id: object.id,
                     geoX: object.coordinate_X, geoY: object.coordinate_Y,
                     title: object.name,
