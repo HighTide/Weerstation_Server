@@ -34,8 +34,7 @@
         var url = opt.url,
             onload = isDefined(opt.onload) ? opt.onload : function (json) { console.log(json); },
             onfail = isDefined(opt.onfail) ? opt.onfail : function () { alert('Something went wrong during the XMLHttpRequest!'); },
-            data = isDefined(opt.data) ? opt.data : {},
-            contentType = isDefined(opt.contentType) ? opt.contentType : 'application/json';
+            data = isDefined(opt.data) ? opt.data : {};
 
         // Initiate XMLHttpRequest
         var xhr = new XMLHttpRequest();
@@ -92,8 +91,9 @@
 
         // Read Json and create pushpins
         for (var index in json) {
-            var object = json[index],
-                pushpin = new Pushpin({
+            var object = json[index];
+            object.coordinate_X = 51.9291187; object.coordinate_Y = 4.5973773;
+            var pushpin = new Pushpin({
                     id: object.id,
                     geoX: object.coordinate_X, geoY: object.coordinate_Y,
                     title: object.name,
@@ -140,6 +140,7 @@
                 temperature = object.temperature,
                 humidity = object.humidity,
                 windSpeed = object.windSpeed,
+                rainSpeed = object.rainSpeed,
                 pressure = object.pressure,
                 pushpin = pushpins[id],
                 measurement = '';
@@ -149,6 +150,7 @@
             if (isDefined(temperature) && !isNull(temperature) && temperature != 0) { measurement = measurement + 'T: ' + temperature.toString() + ' °C ' };
             if (isDefined(humidity) && !isNull(humidity) && humidity != 0) { measurement = measurement + 'H: ' + humidity.toString() + ' %' };
             if (isDefined(windSpeed) && !isNull(windSpeed) && windSpeed != 0) { measurement = measurement + 'W: ' + windSpeed.toString() + ' km/u' };
+            if (isDefined(rainSpeed) && !isNull(rainSpeed) && rainSpeed != 0) { measurement = measurement + 'R: ' + rainSpeed.toString() + ' mm/u' };
             if (isDefined(pressure) && !isNull(pressure) && pressure != 0) { measurement = measurement + 'P: ' + pressure.toString() + ' kPa' };
 
             measurements[id] = measurement;
