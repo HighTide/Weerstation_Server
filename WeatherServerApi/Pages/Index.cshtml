@@ -1,10 +1,185 @@
 ﻿@page
-@model IndexModel
+@model WeatherServerApi.MapModel
 @{
-    ViewData["Title"] = "Home page";
+    Layout = "~/Pages/Shared/_LayoutAlt.cshtml";
+    ViewData["Title"] = "Map";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<div id='myMap' style='position: absolute; width: 100%; height: 100%; left: 0px; top: 0px;'></div>
+<script type='text/javascript'>
+    // Global variables
+    var pushpins = new Array(),
+        measurements = new Array(),
+        baseUrl = 'https://weerstation-server.herokuapp.com/',
+        // baseUrl = '',
+        map;
+
+    function isDefined(val) { return typeof val !== undefined; }
+    function isNull(val) { return typeof val === null; }
+
+    function getHomeStations() {
+        xmlHttpRequest({
+            url: 'api/stations/',
+            onload: initMap
+        });
+    }
+
+    function getMeasurements() {
+        xmlHttpRequest({
+            url: 'api/measurements/latest',
+            onload: updateMeasurements
+        });
+    }
+
+    function xmlHttpRequest(opt) {
+        var url = opt.url,
+            onload = isDefined(opt.onload) ? opt.onload : function (json) { console.log(json); },
+            onfail = isDefined(opt.onfail) ? opt.onfail : function () { alert('Something went wrong during the XMLHttpRequest!'); },
+            data = isDefined(opt.data) ? opt.data : {},
+            contentType = isDefined(opt.contentType) ? opt.contentType : 'application/json';
+
+        // Initiate XMLHttpRequest
+        var xhr = new XMLHttpRequest();
+        // Set method and URL
+        xhr.open('GET', url);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                onload(JSON.parse(xhr.responseText));
+            } else {
+                onfail();
+            }
+        };
+        xhr.send(JSON.stringify(data));
+    }
+
+
+    class Pushpin {
+
+        constructor(opt) {
+            this.id = opt.id;
+            this.location = new Microsoft.Maps.Location(opt.geoX, opt.geoY);
+            this.pin = new Microsoft.Maps.Pushpin(this.location, {
+                title: opt.title,
+                subTitle: opt.subTitle,
+                text: opt.text,
+                color: opt.color
+            });
+            this.color = opt.color;
+
+            // Make this object accessible inside the mouse event function ('this' will refer to another object in that scope)
+            var pushpin = this;
+
+            // Add the pushpin to the map
+            opt.map.entities.push(this.pin);
+
+            // Add mouse events to the pushpin.
+            Microsoft.Maps.Events.addHandler(this.pin, 'click', function () {
+                /*Open new page */
+                var url = baseUrl + 'api/stations/' + pushpin.id;
+                window.open(url, '_blank');
+            });
+            // Return the pushpin object
+            return this;
+        }
+    }
+
+    function initMap(json) {
+        // Initiate map and set it to global 'map'
+        map = new Microsoft.Maps.Map(document.getElementById('myMap'), { mapTypeId: Microsoft.Maps.MapTypeId.aerial });
+
+        // Predefine totals of the geo-coordinates
+        var totalX = 0, totalY = 0;
+
+        // Read Json and create pushpins
+        for (var index in json) {
+            var object = json[index],
+                pushpin = new Pushpin({
+                    id: object.id,
+                    geoX: object.coordinate_X, geoY: object.coordinate_Y,
+                    title: object.name,
+                    subTitle: '',
+                    text: object.name[0],
+                    color: object.color,
+                    map: map
+                });
+
+            // Add pushpin to array of pushpins
+            pushpins[object.id] = pushpin;
+            measurements[object.id] = '';
+
+            // Increment totals of geo-coordinates
+            totalX += object.coordinate_X;
+            totalY += object.coordinate_Y;
+        }
+
+        // Divide total of geo-coordinates by amount of pushpins to get the average geo-location
+        var averageX = totalX / json.length,
+            averageY = totalY / json.length;
+
+        // Set center of map:
+        map.setView({
+            center: new Microsoft.Maps.Location(averageX, averageY),
+            zoom: 10,
+            labelOverlay: Microsoft.Maps.LabelOverlay.hidden
+        });
+
+        // Update values of measurements every 60 seconds
+        getMeasurements();
+        setInterval(getMeasurements, 60 * 1000); // 60 seconds
+    }
+
+    function updateMeasurements(json) {
+        // Clear measurements
+        for (var index in measurements) { measurements[index] = ''; }
+
+        // Update measurements
+        for (var index in json) {
+            var object = json[index],
+                // Get basic information
+                id = object.station,
+                temperature = object.temperature,
+                humidity = object.humidity,
+                windSpeed = object.windSpeed,
+                rainSpeed = object.rainSpeed,
+                pressure = object.pressure,
+                pushpin = pushpins[id],
+                measurement = '';
+
+
+            // Do not add data to subtitle if a null-value is given
+            if (isDefined(temperature) && !isNull(temperature) && temperature != 0) { measurement = measurement + 'T: ' + temperature.toString() + ' °C ' };
+            if (isDefined(humidity) && !isNull(humidity) && humidity != 0) { measurement = measurement + 'H: ' + humidity.toString() + ' %' };
+            if (isDefined(windSpeed) && !isNull(windSpeed) && windSpeed != 0) { measurement = measurement + 'W: ' + windSpeed.toString() + ' km/u' };
+            if (isDefined(rainSpeed) && !isNull(rainSpeed) && rainSpeed != 0) { measurement = measurement + 'R: ' + rainSpeed.toString() + ' mm/u' };
+            if (isDefined(pressure) && !isNull(pressure) && pressure != 0) { measurement = measurement + 'P: ' + pressure.toString() + ' hPa' };
+
+            measurements[id] = measurement;
+
+        }
+
+        // Process measurements
+        for (var id in pushpins) {
+            var pushpin = pushpins[id],
+                measurement = measurements[id];
+
+            // If no values are given, subtitle is still empty
+            if (measurement.length === 0) {
+                pushpin.pin.setOptions({
+                    subTitle: 'Offline.',
+                    color: 'red'
+                });
+            } else {
+                pushpin.pin.setOptions({
+                    subTitle: measurement,
+                    color: pushpin.color
+                });
+            }
+
+        }
+    }
+
+</script>
+
+<script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?key=Arqsw64sC6P3jNxXk9HJ_IrUhNfI8e1MjgVSC2QuMiqo3nxvmNS-CduSkOUnRmOu&callback=getHomeStations' async defer></script>
+
