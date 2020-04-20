@@ -151,7 +151,7 @@
             if (isDefined(humidity) && !isNull(humidity) && humidity != 0) { measurement = measurement + 'H: ' + humidity.toString() + ' %' };
             if (isDefined(windSpeed) && !isNull(windSpeed) && windSpeed != 0) { measurement = measurement + 'W: ' + windSpeed.toString() + ' km/u' };
             if (isDefined(rainSpeed) && !isNull(rainSpeed) && rainSpeed != 0) { measurement = measurement + 'R: ' + rainSpeed.toString() + ' mm/u' };
-            if (isDefined(pressure) && !isNull(pressure) && pressure != 0) { measurement = measurement + 'P: ' + pressure.toString() + ' kPa' };
+            if (isDefined(pressure) && !isNull(pressure) && pressure != 0) { measurement = measurement + 'P: ' + pressure.toString() + ' hPa' };
 
             measurements[id] = measurement;
 
