@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WeatherServerApi.Data;
+using Microsoft.EntityFrameworkCore;
+using WeatherServerApi.Data;
 
 namespace WeatherServerApi
 {
@@ -18,10 +20,17 @@ namespace WeatherServerApi
         }
 
         public List<Station> stations { get; set; }
+        public List<Measurement> measurements { get; set; }
+
+
 
         public void OnGet()
         {
             stations = _context.Stations.ToList();
+            measurements = _context.Measurements.ToList();
+            ViewData["stations"] = stations;
+            ViewData["measurements"] = measurements;
         }
+
     }
 }

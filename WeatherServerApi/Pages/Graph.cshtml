@@ -3,74 +3,115 @@
 @{
     Layout = "~/Pages/Shared/_LayoutAlt.cshtml";
     ViewData["Title"] = "Graph";
+    var stations = ViewData["stations"] as Station;
+    var measurements = ViewData["measurements"] as Measurement;
 }
-    <html>
-    <head>
-        <!--Load the AJAX API-->
-        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-        <script type="text/javascript">
 
-            // Load the Visualization API and the corechart package.
-            google.charts.load('current', { 'packages': ['corechart'] });
+@using System.Linq;
+@using System;
 
-            // Set a callback to run when the Google Visualization API is loaded.
-            google.charts.setOnLoadCallback(drawChart);
 
-            // Callback that creates and populates a data table,
-            // instantiates the chart, passes in the data and
-            // draws it.
-            function drawChart() {
 
-                // Create a data table for temperatures.
-                var data_temp = google.visualization.arrayToDataTable([
+
+<html>
+<head>
+    <!--Load the AJAX API-->
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+
+
+
+        // Load the Visualization API and the corechart package.
+        google.charts.load('current', { 'packages': ['corechart'] });
+
+        // Set a callback to run when the Google Visualization API is loaded.
+        google.charts.setOnLoadCallback(drawChart);
+
+        // Callback that creates and populates a data table,
+        // instantiates the chart, passes in the data and
+        // draws it.
+
+
+
+
+
+        function drawChart() {
+
+
+
+            //var StationsAndMeasurements = stations.Zip(measurements, (n, w) => new { Station : n, Measurement : w });
+            for(const station of @Model.stations`) {
+                for (const measurement of @Model.measurements`) {
+                    if (station.Name === measurement.Station.Name) {
+                      var data_temp = google.visualization.arrayToDataTable([
                     ['Name', 'Temperature'],
-                    ['Jarek', 23.60],
-                    ['Omid', 19.50],
-                    ['Jurre', 21.20]
+                    [station.Name, measurement.Temperature]
+                ]);
+                      break; // only set first occurrence
+                   }
+                }
+            }
+
+
+
+              /*  var data_temp = google.visualization.arrayToDataTable([
+                    ['Name', 'Temperature'],
+                    [item1.Station.Name, item2.Temperature]
                 ]);
 
-                // Create a data table for humidity (humidities?).
                 var data_hum = google.visualization.arrayToDataTable([
                     ['Name', 'Humidity'],
-                    ['Jarek', 24],
-                    ['Omid', 20],
-                    ['Jurre', 22]
+                    [item1.Station.Name, item2.Humidity]
                 ]);
+            }*/
 
-                // Create a data table for pressures.
-                var data_pressure = google.visualization.arrayToDataTable([
-                    ['Name', 'Pressure'],
-                    ['Jarek', 1016],
-                    ['Omid', 1018],
-                    ['Jurre', 1018]
-                ]);
 
-                // Set the chart options.
-                var options = {
-                    title: "Data of weatherstations",
-                    width: 600,
-                    height: 400,
-                    bar: { groupWidth: "95%" },
-                    legend: { position: "none" },
-                };
 
-                // Render the chart.
-                var Chart_temp = new google.visualization.ColumnChart(document.getElementById("chart_temp"));
-                Chart_temp.draw(data_temp, options);
+            // Create a data table for temperatures.
 
-                var Chart_hum = new google.visualization.ColumnChart(document.getElementById("chart_hum"));
-                Chart_hum.draw(data_hum, options);
 
-                var Chart_pressure = new google.visualization.ColumnChart(document.getElementById("chart_pressure"));
-                Chart_pressure.draw(data_pressure, options);
-            }
-        </script>
-    </head>
+            // Create a data table for humidity (humidities?).
+            /* var data_hum = google.visualization.arrayToDataTable([
+                 ['Jarek', 24],
+                 ['Omid', 20],
+                 ['Jurre', 22]
+             ]);*/
 
-    <body>
-        <!--Div that will hold the chart-->
-        <div id="chart_temp"></div>
-        <div id="chart_hum"></div>
-        <div id="chart_pressure"></div>
-    </body>
-    </html>
+            // Create a data table for pressures.
+            var data_pressure = google.visualization.arrayToDataTable([
+                ['Name', 'Pressure'],
+                ['Jarek', 1016],
+                ['Omid', 1018],
+                ['Jurre', 1018]
+            ]);
+
+            // Set the chart options.
+            var options = {
+                title: "Data of weatherstations",
+                width: 600,
+                height: 400,
+                bar: { groupWidth: "95%" },
+                legend: { position: "none" },
+            };
+
+            // Render the chart.
+            var Chart_temp = new google.visualization.ColumnChart(document.getElementById("chart_temp"));
+            Chart_temp.draw(data_temp, options);
+
+          //  var Chart_hum = new google.visualization.ColumnChart(document.getElementById("chart_hum"));
+            //Chart_hum.draw(data_hum, options);
+
+            var Chart_pressure = new google.visualization.ColumnChart(document.getElementById("chart_pressure"));
+            Chart_pressure.draw(data_pressure, options);
+        }
+    </script>
+</head>
+
+<body>
+    <!--Div that will hold the chart-->
+    <div id="chart_temp"></div>
+    <div id="chart_hum"></div>
+    <div id="chart_pressure"></div>
+</body>
+</html>
